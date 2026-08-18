@@ -9,6 +9,13 @@ import boardRoutes from './routes/board.routes';
 import listRoutes from './routes/list.routes';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
+import fs from 'fs';
+
+// Crear carpeta de uploads si no existe
+const uploadDir = path.join(__dirname, '../public/uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
