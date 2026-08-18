@@ -1,4 +1,4 @@
-name: 🧪 Frontend CI
+name: 🧪 CI Pipeline
 
 on:
   push:
@@ -7,9 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  frontend-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -22,9 +21,30 @@ jobs:
       - name: 📦 Install Frontend Dependencies
         run: |
           cd frontend
-          npm ci
+          npm install
 
-      - name: 🧪 Run Tests
+      - name: 🧪 Run Frontend Tests
         run: |
           cd frontend
+          npm run test
+
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: 🧪 Run Backend Tests
+        run: |
+          cd backend
           npm run test
