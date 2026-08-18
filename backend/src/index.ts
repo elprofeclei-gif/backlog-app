@@ -7,6 +7,8 @@ import taskRoutes from './routes/task.routes';
 import userRoutes from './routes/user.routes';
 import boardRoutes from './routes/board.routes';
 import listRoutes from './routes/list.routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,7 +25,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/boards', boardRoutes);
-app.use('/api/lists', listRoutes); // <-- Nuevo
+app.use('/api/lists', listRoutes);
+// Documentación Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

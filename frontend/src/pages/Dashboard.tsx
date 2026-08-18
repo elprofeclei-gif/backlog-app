@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useBoardController } from '../controllers/useBoard';
 import type { Task } from '../models/task.model';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DraggableProvided } from '@hello-pangea/dnd';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import UserMenu from '../components/layout/UserMenu'; // <-- Importado aquí
 
 const boardColors: Record<string, string> = {
   blue: 'bg-blue-800',
@@ -17,12 +16,10 @@ const boardColors: Record<string, string> = {
 };
 
 export default function Dashboard() {
-  useDocumentTitle('Tablero Kanban');
   const [newListTitle, setNewListTitle] = useState('');
   const [addingList, setAddingList] = useState(false);
 
   const { id: boardId } = useParams<{ id: string }>();
-  const auth = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -54,6 +51,7 @@ export default function Dashboard() {
 
   return (
     <div className={`min-h-screen ${bgColor} text-white flex flex-col`}>
+      {/* NAVBAR ACTUALIZADO */}
       <nav className="bg-black/20 backdrop-blur-sm p-4 flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <button
@@ -69,27 +67,22 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Contadores de Listas y Tarjetas */}
-        <div className="flex items-center gap-3 text-sm">
-          <div className="bg-black/20 px-3 py-1 rounded-full flex items-center gap-2">
-            <span className="font-bold text-white">{totalLists}</span>
-            <span className="text-white/70">Listas</span>
+        <div className="flex items-center gap-4">
+          {/* Contadores de Listas y Tarjetas */}
+          <div className="hidden md:flex items-center gap-3 text-sm">
+            <div className="bg-black/20 px-3 py-1 rounded-full flex items-center gap-2">
+              <span className="font-bold text-white">{totalLists}</span>
+              <span className="text-white/70">Listas</span>
+            </div>
+            <div className="bg-black/20 px-3 py-1 rounded-full flex items-center gap-2">
+              <span className="font-bold text-white">{totalTasks}</span>
+              <span className="text-white/70">Tareas</span>
+            </div>
           </div>
-          <div className="bg-black/20 px-3 py-1 rounded-full flex items-center gap-2">
-            <span className="font-bold text-white">{totalTasks}</span>
-            <span className="text-white/70">Tarjetas</span>
-          </div>
-        </div>
 
-        <button
-          onClick={() => {
-            auth.logout();
-            navigate('/login');
-          }}
-          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold"
-        >
-          Cerrar Sesión
-        </button>
+          {/* Aquí está el menú de usuario transparente */}
+          <UserMenu transparent />
+        </div>
       </nav>
 
       <div className="p-4 flex-1 overflow-x-auto">
@@ -98,17 +91,16 @@ export default function Dashboard() {
             {lists.map((list) => (
               <div
                 key={list.id}
-                className="w-72 bg-gray-100 rounded-lg shadow-lg flex flex-col max-h-[80vh]"
+                className="w-72 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg flex flex-col max-h-[80vh]"
               >
                 <div className="p-3 flex justify-between items-center gap-2">
                   <div className="flex items-center gap-2 flex-1">
                     <EditableText
                       initialText={list.title}
                       onEdit={(newTitle) => editList(list.id, newTitle)}
-                      className="font-bold text-gray-800 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+                      className="font-bold text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
                     />
-                    {/* Badge de conteo de tarjetas */}
-                    <span className="text-xs font-bold text-gray-500 bg-gray-200 rounded-full px-2 py-0.5">
+                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 rounded-full px-2 py-0.5">
                       {list.tasks.length}
                     </span>
                   </div>
@@ -154,13 +146,16 @@ export default function Dashboard() {
             {/* Botón de añadir lista */}
             <div className="w-72 flex-shrink-0">
               {addingList ? (
-                <form onSubmit={handleAddList} className="bg-gray-100 p-3 rounded shadow-lg">
+                <form
+                  onSubmit={handleAddList}
+                  className="bg-gray-100 dark:bg-gray-800 p-3 rounded shadow-lg"
+                >
                   <input
                     autoFocus
                     value={newListTitle}
                     onChange={(e) => setNewListTitle(e.target.value)}
                     placeholder="Introduce el título de la lista..."
-                    className="w-full p-2 rounded border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <div className="flex gap-2 mt-2">
                     <button
@@ -172,7 +167,7 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={() => setAddingList(false)}
-                      className="text-gray-600 hover:text-gray-900 px-2"
+                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 px-2"
                     >
                       ✖
                     </button>
@@ -228,7 +223,7 @@ function EditableText({
           value={text}
           onChange={(e) => setText(e.target.value)}
           onBlur={handleSubmit}
-          className="p-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
+          className="p-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 dark:text-white dark:bg-gray-700"
         />
       </form>
     );
@@ -263,7 +258,7 @@ function TaskItem({
   const [title, setTitle] = useState(task.title);
 
   const handleStartEditing = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evita que el clic arrastre la tarjeta
+    e.stopPropagation();
     setTitle(task.title);
     setIsEditing(true);
   };
@@ -280,7 +275,7 @@ function TaskItem({
   };
 
   const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation(); // El fix principal para poder eliminar la última tarjeta
+    e.stopPropagation();
     onDelete(task.id);
   };
 
@@ -289,7 +284,7 @@ function TaskItem({
       ref={innerRef}
       {...draggableProps}
       {...dragHandleProps}
-      className="bg-white p-2 rounded shadow-sm mb-2 cursor-grab active:cursor-grabbing"
+      className="bg-white dark:bg-gray-700 p-2 rounded shadow-sm mb-2 cursor-grab active:cursor-grabbing"
     >
       {isEditing ? (
         <div className="flex gap-1">
@@ -297,7 +292,7 @@ function TaskItem({
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 p-1 text-sm text-gray-800 bg-white border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="flex-1 p-1 text-sm text-gray-800 dark:text-white bg-white dark:bg-gray-800 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button onClick={handleSave} className="bg-green-500 text-white px-2 rounded text-xs">
             ✓
@@ -308,13 +303,13 @@ function TaskItem({
           <div className="flex items-center gap-2 flex-1">
             <button
               onClick={handleToggle}
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-400 hover:border-green-500'}`}
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-400 dark:border-gray-500 hover:border-green-500'}`}
             >
               {task.completed && <span className="text-white text-xs">✓</span>}
             </button>
 
             <span
-              className={`text-sm text-gray-800 break-all ${task.completed ? 'line-through text-gray-400' : ''}`}
+              className={`text-sm text-gray-800 dark:text-gray-200 break-all ${task.completed ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}
             >
               {task.title}
             </span>
@@ -351,11 +346,10 @@ function AddCardForm({ onAdd }: { onAdd: (title: string) => void }) {
     }
   };
 
-  // Nueva función para detectar la tecla Enter
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // Evita el salto de línea
-      handleSubmit(e); // Envía el formulario
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -366,9 +360,9 @@ function AddCardForm({ onAdd }: { onAdd: (title: string) => void }) {
           autoFocus
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={handleKeyDown} // <-- Agregado aquí
+          onKeyDown={handleKeyDown}
           placeholder="Introduce un título para esta tarjeta..."
-          className="w-full p-2 rounded border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
+          className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
           rows={3}
         />
         <div className="flex gap-2 mt-2">
@@ -381,7 +375,7 @@ function AddCardForm({ onAdd }: { onAdd: (title: string) => void }) {
           <button
             type="button"
             onClick={() => setAdding(false)}
-            className="text-gray-600 hover:text-gray-900 px-2"
+            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 px-2"
           >
             ✖
           </button>
@@ -393,7 +387,7 @@ function AddCardForm({ onAdd }: { onAdd: (title: string) => void }) {
   return (
     <button
       onClick={() => setAdding(true)}
-      className="text-gray-600 hover:bg-gray-200 w-full text-left py-2 px-3 text-sm rounded-b-lg transition-colors"
+      className="text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 w-full text-left py-2 px-3 text-sm rounded-b-lg transition-colors"
     >
       + Añade una tarjeta
     </button>

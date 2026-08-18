@@ -5,6 +5,7 @@ import type { AxiosError } from 'axios';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import UserMenu from '../components/layout/UserMenu';
 
 export default function Profile() {
   useDocumentTitle('Mi Perfil');
@@ -79,18 +80,24 @@ export default function Profile() {
   const initial = name ? name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-800">Mi Perfil</h1>
-        <Button variant="primary" onClick={() => navigate('/')}>
-          Volver al Tablero
-        </Button>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <nav className="bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center sticky top-0 z-20">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/')}
+            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-semibold"
+          >
+            ← Volver al Tablero
+          </button>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Mi Perfil</h1>
+        </div>
+        <UserMenu />
       </nav>
 
-      <div className="bg-white shadow-sm border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-6 py-8 flex items-center space-x-6">
           <div className="relative">
-            <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-md overflow-hidden">
+            <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-md overflow-hidden">
               {image ? (
                 <img src={image} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
@@ -123,10 +130,12 @@ export default function Profile() {
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">{name || 'Usuario sin nombre'}</h2>
-            <p className="text-gray-600 text-lg">{email}</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {name || 'Usuario sin nombre'}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">{email}</p>
             <span
-              className={`mt-2 inline-block px-3 py-1 text-xs font-bold rounded-full ${role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}
+              className={`mt-2 inline-block px-3 py-1 text-xs font-bold rounded-full ${role === 'ADMIN' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'}`}
             >
               {role === 'ADMIN' ? '👑 Administrador' : '👤 Usuario'}
             </span>
@@ -136,24 +145,27 @@ export default function Profile() {
 
       <div className="max-w-4xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         {message && (
-          <div className="md:col-span-3 bg-green-100 text-green-700 p-3 rounded text-sm">
+          <div className="md:col-span-3 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded text-sm">
             {message}
           </div>
         )}
         {error && (
-          <div className="md:col-span-3 bg-red-100 text-red-700 p-3 rounded text-sm">{error}</div>
+          <div className="md:col-span-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded text-sm">
+            {error}
+          </div>
         )}
 
-        {/* Tarjeta: Datos de la cuenta */}
-        <div className="md:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Datos de la cuenta</h3>
+        <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+            Datos de la cuenta
+          </h3>
           <form onSubmit={handleUpdateProfile} className="space-y-4">
             <Input
               label="Email (no editable)"
               type="email"
               value={email}
               disabled
-              className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
+              className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
             />
             <Input
               label="Nombre completo"
@@ -165,15 +177,18 @@ export default function Profile() {
           </form>
         </div>
 
-        {/* Tarjeta: Seguridad */}
-        <div className="md:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Seguridad</h3>
+        <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+            Seguridad
+          </h3>
 
           {!showPasswordForm ? (
             <div className="flex justify-between items-center py-2">
               <div>
-                <p className="text-sm font-medium text-gray-700">Contraseña</p>
-                <p className="text-xs text-gray-500">Última actualización: hace un tiempo</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Última actualización: hace un tiempo
+                </p>
               </div>
               <Button variant="secondary" onClick={() => setShowPasswordForm(true)}>
                 Cambiar contraseña

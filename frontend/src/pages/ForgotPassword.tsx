@@ -20,12 +20,16 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Recuperar Contraseña</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors p-4">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-700">
+        <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
+          Recuperar Contraseña
+        </h1>
 
         {message && (
-          <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm">{message}</div>
+          <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded-lg mb-4 text-sm font-medium">
+            {message}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -41,9 +45,12 @@ export default function ForgotPassword() {
           </Button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-gray-600">
+        <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
           ¿Ya recuerdas tu contraseña?{' '}
-          <a href="/login" className="text-primary font-semibold hover:underline">
+          <a
+            href="/login"
+            className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+          >
             Iniciar sesión
           </a>
         </p>

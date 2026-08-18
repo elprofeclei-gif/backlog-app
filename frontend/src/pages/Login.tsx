@@ -38,15 +38,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-200 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
-        {/* Logo y Bienvenida */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-200 dark:from-gray-900 dark:to-gray-800 p-4 transition-colors">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} />
-          <h1 className="text-2xl font-bold text-gray-900 mt-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-4">
             {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
             {isLogin
               ? 'Inicia sesión para acceder a tus tableros'
               : 'Empieza a organizar tus proyectos hoy'}
@@ -54,12 +53,11 @@ export default function Login() {
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm font-medium">
+          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg mb-4 text-sm font-medium">
             {error}
           </div>
         )}
 
-        {/* Botón de Google */}
         <div className="mb-4 flex justify-center">
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
@@ -81,14 +79,14 @@ export default function Login() {
           />
         </div>
 
-        {/* Separador */}
         <div className="my-6 flex items-center">
-          <div className="flex-grow border-t border-gray-200"></div>
-          <span className="mx-4 text-gray-400 text-xs font-semibold uppercase">o con tu email</span>
-          <div className="flex-grow border-t border-gray-200"></div>
+          <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+          <span className="mx-4 text-gray-400 dark:text-gray-500 text-xs font-semibold uppercase">
+            o con tu email
+          </span>
+          <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {!isLogin && (
             <Input
@@ -118,24 +116,26 @@ export default function Login() {
           </Button>
         </form>
 
-        {/* Footer */}
         <div className="mt-6 text-center space-y-2">
           {isLogin && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               ¿Olvidaste tu contraseña?{' '}
-              <a href="/forgot-password" className="text-blue-600 font-semibold hover:underline">
+              <a
+                href="/forgot-password"
+                className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+              >
                 Recuperar
               </a>
             </p>
           )}
-          <p className="text-sm text-gray-600 pt-2 border-t border-gray-100">
+          <p className="text-sm text-gray-600 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
             {isLogin ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?'}{' '}
             <button
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
               }}
-              className="text-blue-600 font-semibold hover:underline"
+              className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
             >
               {isLogin ? 'Regístrate gratis' : 'Inicia sesión'}
             </button>
