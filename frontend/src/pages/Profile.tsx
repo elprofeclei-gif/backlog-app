@@ -99,7 +99,14 @@ export default function Profile() {
           <div className="relative">
             <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-md overflow-hidden">
               {image ? (
-                <img src={image} alt="Avatar" className="w-full h-full object-cover" />
+                <img
+                  src={image}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               ) : (
                 initial
               )}

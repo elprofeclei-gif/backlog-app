@@ -115,13 +115,14 @@ export const updateUser = async (req: Request, res: Response) => {
 export const uploadAvatar = async (req: Request, res: Response) => {
   const userId = req.userId!;
   try {
-    // @ts-ignore (Multer añade req.file al objeto request)
+    // @ts-ignore
     if (!req.file) {
       return res.status(400).json({ message: 'No se subió ninguna imagen' });
     }
 
-    // Construimos la URL completa: http://localhost:3001/uploads/123456789.jpg
-    const imageUrl = `http://localhost:3001/uploads/${req.file.filename}`;
+    // Construir URL dinámica (funciona en local y en producción)
+    const baseUrl = process.env.RENDER_EXTERNAL_URL || `${req.protocol}://${req.get('host')}`;
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },

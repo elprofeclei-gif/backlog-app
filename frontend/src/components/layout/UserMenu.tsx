@@ -48,7 +48,14 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
         <button onClick={() => setShowMenu(!showMenu)} className={wrapperClasses}>
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold overflow-hidden border-2 border-white/30">
             {user?.image ? (
-              <img src={user.image} alt="avatar" className="w-full h-full object-cover" />
+              <img
+                src={user.image}
+                alt="avatar"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             ) : (
               initial
             )}
