@@ -140,6 +140,15 @@ export default function Login() {
               {isLogin ? 'Regístrate gratis' : 'Inicia sesión'}
             </button>
           </p>
+          <button
+            onClick={() => {
+              const datos = null;
+              // @ts-ignore
+              console.log(datos.algo.nombre); // Esto hará que la app crashee
+            }}
+          >
+            Romper la app (Test Sentry)
+          </button>
         </div>
       </div>
     </div>
