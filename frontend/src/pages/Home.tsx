@@ -3,8 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BoardModel } from '../models/board.model';
 import type { Board } from '../models/board.model';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import Button from '../components/ui/Button';
+import Logo from '../components/ui/Logo';
 
 export default function Home() {
+  useDocumentTitle('Mis Tableros');
   const [boards, setBoards] = useState<Board[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newBoardTitle, setNewBoardTitle] = useState('');
@@ -14,12 +18,12 @@ export default function Home() {
   const navigate = useNavigate();
 
   const colors = [
-    { id: 'blue', bg: 'bg-blue-600' },
-    { id: 'green', bg: 'bg-green-600' },
-    { id: 'purple', bg: 'bg-purple-600' },
-    { id: 'orange', bg: 'bg-orange-600' },
-    { id: 'pink', bg: 'bg-pink-600' },
-    { id: 'indigo', bg: 'bg-indigo-600' },
+    { id: 'blue', bg: 'bg-blue-600', hover: 'hover:bg-blue-700' },
+    { id: 'green', bg: 'bg-green-600', hover: 'hover:bg-green-700' },
+    { id: 'purple', bg: 'bg-purple-600', hover: 'hover:bg-purple-700' },
+    { id: 'orange', bg: 'bg-orange-600', hover: 'hover:bg-orange-700' },
+    { id: 'pink', bg: 'bg-pink-600', hover: 'hover:bg-pink-700' },
+    { id: 'indigo', bg: 'bg-indigo-600', hover: 'hover:bg-indigo-700' },
   ];
 
   useEffect(() => {
@@ -54,74 +58,65 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 min-h-screen p-4 flex flex-col">
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold">
-            B
-          </div>
-          <h1 className="text-xl font-bold">Backlog</h1>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Navbar superior */}
+      <nav className="bg-white border-b border-gray-200 shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          {/* Aquí está nuestro nuevo Logo */}
+          <Logo size={36} />
+          <h1 className="text-xl font-bold text-gray-800">Backlog</h1>
         </div>
-
-        <nav className="space-y-2 flex-1">
-          <button
-            onClick={() => navigate('/')}
-            className="w-full text-left px-3 py-2 rounded hover:bg-gray-700 flex items-center gap-2"
-          >
-            <span>🏠</span> Inicio
-          </button>
-          <button
-            onClick={() => navigate('/profile')}
-            className="w-full text-left px-3 py-2 rounded hover:bg-gray-700 flex items-center gap-2"
-          >
-            <span>👤</span> Mi Perfil
-          </button>
-        </nav>
-
-        <button
-          onClick={handleLogout}
-          className="w-full text-left px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2 text-red-400 hover:text-white transition-colors"
-        >
-          <span>🚪</span> Cerrar Sesión
-        </button>
-      </aside>
+        <div className="flex items-center gap-4">
+          <Button variant="secondary" onClick={() => navigate('/profile')} className="text-sm">
+            Mi Perfil
+          </Button>
+          <Button variant="danger" onClick={handleLogout} className="text-sm">
+            Cerrar Sesión
+          </Button>
+        </div>
+      </nav>
 
       {/* Contenido principal */}
-      <main className="flex-1 p-8 overflow-auto">
-        <h2 className="text-2xl font-bold mb-6">Tus Tableros</h2>
+      <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Tus Tableros</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {/* Botón Crear Tablero */}
           <button
             onClick={() => setShowCreateForm(true)}
-            className="h-32 rounded-lg bg-gray-800 hover:bg-gray-700 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+            className="h-32 rounded-xl bg-white border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-500 transition-colors shadow-sm"
           >
             <div className="text-center">
-              <div className="text-3xl mb-1">+</div>
-              <div className="text-sm font-medium">Crear nuevo tablero</div>
+              <div className="text-4xl mb-1">+</div>
+              <div className="text-sm font-semibold">Crear nuevo tablero</div>
             </div>
           </button>
 
           {/* Tableros existentes */}
           {boards.map((board) => {
             const colorClass = colors.find((c) => c.id === board.color)?.bg || 'bg-blue-600';
-            // Sumar todas las tareas de las listas del tablero
-            const totalTasks = board.lists?.reduce((acc, list) => acc + list._count.tasks, 0) || 0;
-
+            const hoverClass =
+              colors.find((c) => c.id === board.color)?.hover || 'hover:bg-blue-700';
             return (
               <div
                 key={board.id}
                 onClick={() => navigate(`/board/${board.id}`)}
-                className={`h-32 rounded-lg ${colorClass} p-4 cursor-pointer hover:scale-105 transition-transform relative group flex flex-col justify-between`}
+                className={`h-32 rounded-xl ${colorClass} p-4 cursor-pointer ${hoverClass} transition-all relative group shadow-md hover:shadow-lg hover:-translate-y-1`}
               >
-                <h3 className="font-bold text-lg text-white">{board.title}</h3>
-                {/* Mostrar el conteo total de tarjetas */}
-                <p className="text-white/80 text-sm">
-                  {totalTasks} {totalTasks === 1 ? 'tarea' : 'tareas'}
-                </p>
+                {/* Calculamos el total de tarjetas sumando las listas de forma segura */}
+                {(() => {
+                  const totalTasks =
+                    board.lists?.reduce((acc, list) => acc + (list._count?.tasks || 0), 0) || 0;
+                  return (
+                    <>
+                      <h3 className="font-bold text-lg text-white drop-shadow">{board.title}</h3>
+                      <p className="text-white/80 text-sm font-medium">
+                        {totalTasks} {totalTasks === 1 ? 'tarea' : 'tareas'}
+                      </p>
+                    </>
+                  );
+                })()}
 
-                {/* Botón eliminar (aparece al hover) */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -130,7 +125,7 @@ export default function Home() {
                       setBoards(boards.filter((b) => b.id !== board.id));
                     }
                   }}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-red-600 p-1 rounded text-white text-sm transition-all"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-red-600 p-1.5 rounded-md text-white text-xs transition-all"
                 >
                   🗑️
                 </button>
@@ -138,57 +133,59 @@ export default function Home() {
             );
           })}
         </div>
-
-        {/* Modal para crear tablero */}
-        {showCreateForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-xl font-bold mb-4">Crear nuevo tablero</h3>
-              <form onSubmit={handleCreate} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Título</label>
-                  <input
-                    type="text"
-                    value={newBoardTitle}
-                    onChange={(e) => setNewBoardTitle(e.target.value)}
-                    placeholder="Ej: Proyecto Personal"
-                    className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500"
-                    autoFocus
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Color</label>
-                  <div className="flex gap-2">
-                    {colors.map((color) => (
-                      <button
-                        key={color.id}
-                        type="button"
-                        onClick={() => setNewBoardColor(color.id)}
-                        className={`w-8 h-8 rounded-full ${color.bg} ${newBoardColor === color.id ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800' : ''}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold"
-                  >
-                    Crear
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded font-semibold"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </main>
+
+      {/* Modal para crear tablero */}
+      {showCreateForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Crear nuevo tablero</h3>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título del tablero
+                </label>
+                <input
+                  type="text"
+                  value={newBoardTitle}
+                  onChange={(e) => setNewBoardTitle(e.target.value)}
+                  placeholder="Ej: Proyecto Personal"
+                  className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Color de fondo
+                </label>
+                <div className="flex gap-2">
+                  {colors.map((color) => (
+                    <button
+                      key={color.id}
+                      type="button"
+                      onClick={() => setNewBoardColor(color.id)}
+                      className={`w-8 h-8 rounded-full ${color.bg} ${newBoardColor === color.id ? 'ring-2 ring-gray-800 ring-offset-2' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button type="submit" fullWidth>
+                  Crear
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setShowCreateForm(false)}
+                  fullWidth
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

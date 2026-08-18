@@ -5,6 +5,7 @@ import { useBoardController } from '../controllers/useBoard';
 import type { Task } from '../models/task.model';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DraggableProvided } from '@hello-pangea/dnd';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const boardColors: Record<string, string> = {
   blue: 'bg-blue-800',
@@ -16,6 +17,7 @@ const boardColors: Record<string, string> = {
 };
 
 export default function Dashboard() {
+  useDocumentTitle('Tablero Kanban');
   const [newListTitle, setNewListTitle] = useState('');
   const [addingList, setAddingList] = useState(false);
 

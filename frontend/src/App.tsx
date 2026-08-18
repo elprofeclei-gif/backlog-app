@@ -48,6 +48,8 @@ function App() {
               </PrivateRoute>
             }
           />
+          {/* Redirección 404 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

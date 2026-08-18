@@ -2,8 +2,10 @@ import type { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../api/axios';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export default function ResetPassword() {
+  useDocumentTitle('Recuperar Contraseña');
   const [params] = useSearchParams();
   const token = params.get('token') || '';
   const [newPassword, setNewPassword] = useState('');

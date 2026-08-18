@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import API from '../api/axios';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 
 export default function ForgotPassword() {
+  useDocumentTitle('Recuperar Contraseña');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
@@ -19,27 +23,30 @@ export default function ForgotPassword() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Recuperar Contraseña</h1>
+
         {message && (
           <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm">{message}</div>
         )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-          >
+          <Input
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Button type="submit" fullWidth>
             Enviar Enlace
-          </button>
+          </Button>
         </form>
+
+        <p className="text-center mt-6 text-sm text-gray-600">
+          ¿Ya recuerdas tu contraseña?{' '}
+          <a href="/login" className="text-primary font-semibold hover:underline">
+            Iniciar sesión
+          </a>
+        </p>
       </div>
     </div>
   );

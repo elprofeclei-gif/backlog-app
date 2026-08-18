@@ -2,17 +2,19 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserModel } from '../models/user.model';
 import type { AxiosError } from 'axios';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 
 export default function Profile() {
+  useDocumentTitle('Mi Perfil');
   const navigate = useNavigate();
 
-  // Estados de datos
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
-  const [image, setImage] = useState<string | null>(null); // <-- Nuevo estado para imagen
+  const [image, setImage] = useState<string | null>(null);
 
-  // Estados de formularios
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -26,7 +28,7 @@ export default function Profile() {
       setName(user.name || '');
       setEmail(user.email);
       setRole(user.role);
-      setImage(user.image); // <-- Guardar la imagen si ya tiene una
+      setImage(user.image);
     };
     fetchUser();
   }, []);
@@ -59,7 +61,6 @@ export default function Profile() {
     }
   };
 
-  // Nueva función para manejar la subida de imagen
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -81,27 +82,21 @@ export default function Profile() {
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-800">Mi Perfil</h1>
-        <button
-          onClick={() => navigate('/')}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-semibold"
-        >
+        <Button variant="primary" onClick={() => navigate('/')}>
           Volver al Tablero
-        </button>
+        </Button>
       </nav>
 
-      {/* Header del Perfil con Avatar */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-6 py-8 flex items-center space-x-6">
-          {/* Contenedor del Avatar y botón de cámara */}
           <div className="relative">
-            <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-md overflow-hidden">
+            <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-md overflow-hidden">
               {image ? (
                 <img src={image} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 initial
               )}
             </div>
-            {/* Botón de cámara (Label que dispara el input file) */}
             <label className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md cursor-pointer hover:bg-gray-100 border border-gray-200 transition-colors">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -153,32 +148,20 @@ export default function Profile() {
         <div className="md:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Datos de la cuenta</h3>
           <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email (no editable)</label>
-              <input
-                type="email"
-                value={email}
-                disabled
-                className="mt-1 block w-full rounded-md bg-gray-50 border-gray-200 p-2 text-gray-500 cursor-not-allowed"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nombre completo</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <button
-                type="submit"
-                className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 font-semibold text-sm transition-colors"
-              >
-                Guardar cambios
-              </button>
-            </div>
+            <Input
+              label="Email (no editable)"
+              type="email"
+              value={email}
+              disabled
+              className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
+            />
+            <Input
+              label="Nombre completo"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Button type="submit">Guardar cambios</Button>
           </form>
         </div>
 
@@ -192,49 +175,37 @@ export default function Profile() {
                 <p className="text-sm font-medium text-gray-700">Contraseña</p>
                 <p className="text-xs text-gray-500">Última actualización: hace un tiempo</p>
               </div>
-              <button
-                onClick={() => setShowPasswordForm(true)}
-                className="text-blue-600 font-semibold text-sm hover:underline"
-              >
+              <Button variant="secondary" onClick={() => setShowPasswordForm(true)}>
                 Cambiar contraseña
-              </button>
+              </Button>
             </div>
           ) : (
             <form onSubmit={handleChangePassword} className="space-y-4 pt-4 transition-all">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contraseña Actual</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
+              <Input
+                label="Contraseña Actual"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+              <Input
+                label="Nueva Contraseña"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
               <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 font-semibold text-sm transition-colors"
-                >
+                <Button type="submit" variant="danger">
                   Actualizar Contraseña
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={() => setShowPasswordForm(false)}
-                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 font-semibold text-sm transition-colors"
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
             </form>
           )}
