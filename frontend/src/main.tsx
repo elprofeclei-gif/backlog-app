@@ -17,7 +17,7 @@ Sentry.init({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="TU_ID_DE_GOOGLE.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="T653272792095-2m9c04r5f96iluf0rsgf30o0lnvsjhpu.apps.googleusercontent.com">
       <ThemeProvider>
         <AuthProvider>
           <App />
