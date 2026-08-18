@@ -1,0 +1,21 @@
+{
+  "name": "backlog-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicación full-stack de gestión de tareas estilo Trello (Kanban).",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10"
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx}": [
+      "cd frontend && npx eslint --fix"
+    ],
+    "backend/**/*.ts": [
+      "cd backend && npx eslint --fix"
+    ]
+  }
+}

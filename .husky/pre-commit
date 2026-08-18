@@ -1,0 +1,13 @@
+# .husky/pre-commit
+
+echo "🧪 Corriendo tests antes del commit..."
+
+# Correr tests del frontend
+
+cd frontend && npm run test && cd ..
+
+# Correr tests del backend
+
+cd backend && npm run test && cd ..
+
+echo "✅ Tests pasaron. Procediendo con el commit..."
