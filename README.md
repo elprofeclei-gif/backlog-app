@@ -1,0 +1,75 @@
+📋 Backlog App (Trello Clone)
+Aplicación full-stack de gestión de tareas estilo Kanban (similar a Trello). Permite a los usuarios crear múltiples tableros, listas y tarjetas, así como arrastrar y soltar tarjetas entre listas para organizar su flujo de trabajo de forma visual y dinámica.
+
+🚀 Ver aplicación en vivo: https://backlog-app-self.vercel.app/login
+
+✨ Características Principales
+Autenticación Múltiple: Inicio de sesión con Email/Contraseña (JWT + Bcrypt) e integración de Google OAuth 2.0.
+Roles de Usuario: Sistema de permisos (ADMIN / USER). El primer usuario registrado es automáticamente Administrador.
+Tableros Dinámicos: Crea, edita y elimina tableros con colores personalizables.
+Listas y Tarjetas (CRUD): Crea listas dentro de los tableros y tarjetas dentro de las listas.
+Drag & Drop (Arrastrar y Soltar): Mueve las tarjetas entre listas o reordénalas dentro de la misma lista de forma fluida.
+Edición Inline: Edita los títulos de tableros, listas y tarjetas con un solo clic.
+Gestión de Perfil: Cambio de nombre de usuario, avatar (subida de imágenes) y cambio de contraseña con validación.
+Recuperación de Contraseña: Flujo completo de "Olvidé mi contraseña" mediante envío de correos electrónicos (Resend).
+Interfaz Moderna: Diseño responsivo construido con Tailwind CSS.
+🛠️ Stack Tecnológico
+Frontend:
+
+React + Vite
+TypeScript
+Tailwind CSS
+React Router DOM
+@hello-pangea/dnd (Drag & Drop)
+Axios
+Backend:
+
+Node.js + Express
+TypeScript
+Prisma ORM
+JWT (Autenticación)
+Multer (Subida de archivos)
+Google Auth Library (OAuth)
+Resend (Servicio de correos)
+Base de Datos:
+
+PostgreSQL (Hosteado en Neon)
+Arquitectura:
+
+Patrón MVC (Modelo-Vista-Controlador) tanto en backend como en frontend (Hooks como controladores).
+🗂️ Variables de Entorno
+Para correr este proyecto localmente, necesitarás configurar los siguientes archivos .env.
+
+Backend (backend/.env):
+
+DATABASE_URL="tu_url_de_neon"JWT_SECRET="tu_clave_secreta"GOOGLE_CLIENT_ID="tu_google_client_id"RESEND_API_KEY="tu_resend_api_key" # Opcional si no usas recuperación por correo
+Frontend (frontend/.env):
+
+env
+
+VITE_API_URL="http://localhost:3001/api"
+💻 Instalación y Ejecución Local
+Clona el repositorio:
+bash
+
+git clone https://github.com/elprofeclei-gif/backlog-app.git
+cd backlog-app
+Configurar Backend:
+bash
+
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+Configurar Frontend (en otra terminal):
+bash
+
+cd frontend
+npm install
+npm run dev
+Abre http://localhost:5173 en tu navegador.
+🚀 Despliegue
+Frontend: Desplegado en Vercel.
+Backend: Desplegado en Render.
+Base de Datos: Hosteada en Neon.
