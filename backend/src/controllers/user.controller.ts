@@ -38,6 +38,13 @@ export const changePassword = async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
 
+    // Si el usuario no tiene contraseña (ej. se registró con Google)
+    if (!user.password) {
+      return res
+        .status(400)
+        .json({ message: 'Esta cuenta no usa contraseña. Inicia sesión con Google.' });
+    }
+
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
 
