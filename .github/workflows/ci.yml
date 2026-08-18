@@ -44,7 +44,17 @@ jobs:
           cd backend
           npm install
 
+      # NUEVO PASO: Generar el cliente de Prisma
+      - name: 🛠️ Generate Prisma Client
+        env:
+          DATABASE_URL: 'postgresql://fake:fake@localhost:5432/fake' # Prisma requiere esta variable para generar el cliente, aunque no se conecte
+        run: |
+          cd backend
+          npx prisma generate
+
       - name: 🧪 Run Backend Tests
+        env:
+          DATABASE_URL: 'postgresql://fake:fake@localhost:5432/fake'
         run: |
           cd backend
           npm run test
