@@ -120,9 +120,9 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'No se subió ninguna imagen' });
     }
 
-    // Construir URL dinámica (funciona en local y en producción)
-    const baseUrl = process.env.RENDER_EXTERNAL_URL || `${req.protocol}://${req.get('host')}`;
-    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    // Cloudinary devuelve la URL completa en req.file.path
+    // @ts-ignore
+    const imageUrl = req.file.path;
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
