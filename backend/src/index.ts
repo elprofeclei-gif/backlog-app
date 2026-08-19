@@ -36,6 +36,12 @@ app.use('/api/lists', listRoutes);
 // Documentación Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Manejador de errores global (debe ir al final, antes de app.listen)
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('ERROR GLOBAL DETECTADO:', err.message);
+  res.status(500).json({ message: 'Error interno del servidor', error: err.message });
+});
+
 // Solo escuchamos si no estamos en modo test
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
