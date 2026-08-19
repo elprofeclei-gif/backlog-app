@@ -8,6 +8,7 @@ import Navbar from '../components/layout/Navbar';
 
 export default function Home() {
   useDocumentTitle('Mis Tableros');
+
   const [boards, setBoards] = useState<Board[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newBoardTitle, setNewBoardTitle] = useState('');
