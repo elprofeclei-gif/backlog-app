@@ -130,8 +130,8 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       select: { id: true, email: true, name: true, image: true, role: true },
     });
     res.json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al subir la imagen' });
+  } catch (error: any) {
+    console.error('ERROR SUBIENDO AVATAR:', error.message || error);
+    res.status(500).json({ message: 'Error al subir la imagen', detail: error.message });
   }
 };
