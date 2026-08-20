@@ -16,6 +16,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // <-- Nuevo estado
 
   const navigate = useNavigate();
   const auth = useAuth();
@@ -23,6 +24,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true); // <-- Activar carga
 
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
@@ -34,11 +36,13 @@ export default function Login() {
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Ocurrió un error');
+    } finally {
+      setIsLoading(false); // <-- Siempre apagar la carga al terminar
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-200 dark:from-gray-900 dark:to-gray-800 p-4 transition-colors">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-200 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} />
@@ -111,7 +115,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Button type="submit" fullWidth className="text-base py-2.5">
+          <Button type="submit" fullWidth isLoading={isLoading} className="text-base py-2.5">
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </Button>
         </form>

@@ -6,6 +6,7 @@ export interface List {
   title: string;
   boardId: string;
   tasks: Task[];
+  order?: number;
 }
 
 export const ListModel = {
@@ -23,5 +24,8 @@ export const ListModel = {
   },
   delete: async (id: string): Promise<void> => {
     await API.delete(`/lists/${id}`);
+  },
+  reorder: async (lists: { id: string; order: number }[]): Promise<void> => {
+    await API.put('/lists/reorder', { lists });
   },
 };

@@ -6,6 +6,7 @@ import {
   getBoardById,
   deleteBoard,
   updateBoard,
+  reorderBoards,
 } from '../controllers/board.controller';
 
 const router = Router();
@@ -49,6 +50,35 @@ router.post('/', createBoard);
  *         description: Lista de tableros
  */
 router.get('/', getBoards);
+/**
+ * @swagger
+ * /api/boards/reorder:
+ *   put:
+ *     summary: Reordenar tableros arrastrando y soltando
+ *     tags: [Boards]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               boards:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     order:
+ *                       type: number
+ *     responses:
+ *       200:
+ *         description: Orden de los tableros actualizado
+ */
+router.put('/reorder', reorderBoards); // <-- Nueva ruta
 
 /**
  * @swagger

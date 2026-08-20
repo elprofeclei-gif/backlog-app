@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
-import { getLists, createList, deleteList, updateList } from '../controllers/list.controller';
+import {
+  getLists,
+  createList,
+  deleteList,
+  updateList,
+  reorderLists,
+} from '../controllers/list.controller';
 
 const router = Router();
 router.use(authMiddleware);
@@ -49,7 +55,35 @@ router.get('/:boardId', getLists);
  *         description: Lista creada
  */
 router.post('/', createList);
-
+/**
+ * @swagger
+ * /api/lists/reorder:
+ *   put:
+ *     summary: Reordenar listas de un tablero (Drag & Drop)
+ *     tags: [Lists]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               lists:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     order:
+ *                       type: number
+ *     responses:
+ *       200:
+ *         description: Orden de las listas actualizado correctamente
+ */
+router.put('/reorder', reorderLists);
 /**
  * @swagger
  * /api/lists/{id}:

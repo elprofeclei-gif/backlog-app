@@ -3,8 +3,10 @@ import API from '../api/axios';
 export interface Task {
   id: string;
   title: string;
-  completed: boolean; // <-- Nuevo
+  completed: boolean;
   listId: string;
+  dueDate: string | null;
+  label: string | null; // <-- Agregado
 }
 
 export const TaskModel = {
@@ -14,7 +16,13 @@ export const TaskModel = {
   },
   update: async (
     id: string,
-    data: { title?: string; completed?: boolean; listId?: string }
+    data: {
+      title?: string;
+      completed?: boolean;
+      listId?: string;
+      dueDate?: string | null;
+      label?: string | null;
+    }
   ): Promise<Task> => {
     const { data: resData } = await API.put(`/tasks/${id}`, data);
     return resData;

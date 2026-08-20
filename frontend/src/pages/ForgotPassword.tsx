@@ -8,14 +8,20 @@ export default function ForgotPassword() {
   useDocumentTitle('Recuperar Contraseña');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setMessage('');
+
     try {
       const { data } = await API.post('/auth/forgot-password', { email });
       setMessage(data.message);
     } catch {
       setMessage('Ocurrió un error.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -40,7 +46,7 @@ export default function ForgotPassword() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Button type="submit" fullWidth>
+          <Button type="submit" fullWidth isLoading={isLoading}>
             Enviar Enlace
           </Button>
         </form>

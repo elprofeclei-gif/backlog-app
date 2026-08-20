@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
+import { Toaster } from 'react-hot-toast'; // <-- Nuevo
 import { AuthProvider } from './context/AuthProvider';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
@@ -16,49 +17,58 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    // Envolvemos toda la app con el capturador de errores de Sentry
-    <Sentry.ErrorBoundary
-      fallback={
-        <p className="p-4 text-red-600">
-          Ha ocurrido un error inesperado. El equipo ya fue notificado.
-        </p>
-      }
-    >
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
-                  <Home />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/board/:id"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </Sentry.ErrorBoundary>
+    <>
+      {/* Contenedor de las notificaciones */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: 'dark:bg-gray-800 dark:text-white',
+        }}
+      />
+
+      <Sentry.ErrorBoundary
+        fallback={
+          <p className="p-4 text-red-600 text-center font-bold">
+            Ha ocurrido un error inesperado. El equipo ya fue notificado.
+          </p>
+        }
+      >
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute>
+                    <Home />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/board/:id"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </Sentry.ErrorBoundary>
+    </>
   );
 }
 

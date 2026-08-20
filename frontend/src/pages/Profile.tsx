@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserModel } from '../models/user.model';
 import type { AxiosError } from 'axios';
+import toast from 'react-hot-toast'; // <-- Nuevo
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -18,10 +19,9 @@ export default function Profile() {
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isChangingPass, setIsChangingPass] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -36,29 +36,31 @@ export default function Profile() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSavingProfile(true);
     try {
       await UserModel.updateMe(name);
-      setMessage('Perfil actualizado correctamente');
-      setError('');
-      setTimeout(() => setMessage(''), 3000);
+      toast.success('Perfil actualizado correctamente'); // <-- Toast
     } catch {
-      setError('Error al actualizar perfil');
+      toast.error('Error al actualizar perfil'); // <-- Toast
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsChangingPass(true);
     try {
       await UserModel.changePassword(currentPassword, newPassword);
-      setMessage('Contraseña actualizada correctamente');
-      setError('');
+      toast.success('Contraseña actualizada correctamente'); // <-- Toast
       setCurrentPassword('');
       setNewPassword('');
       setShowPasswordForm(false);
-      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
-      setError(axiosError.response?.data?.message || 'Error al cambiar contraseña');
+      toast.error(axiosError.response?.data?.message || 'Error al cambiar contraseña'); // <-- Toast
+    } finally {
+      setIsChangingPass(false);
     }
   };
 
@@ -69,11 +71,9 @@ export default function Profile() {
     try {
       const updatedUser = await UserModel.uploadAvatar(file);
       setImage(updatedUser.image);
-      setMessage('Foto de perfil actualizada');
-      setError('');
-      setTimeout(() => setMessage(''), 3000);
+      toast.success('Foto de perfil actualizada'); // <-- Toast
     } catch {
-      setError('Error al subir la imagen');
+      toast.error('Error al subir la imagen'); // <-- Toast
     }
   };
 
@@ -99,14 +99,7 @@ export default function Profile() {
           <div className="relative">
             <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-md overflow-hidden">
               {image ? (
-                <img
-                  src={image}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+                <img src={image} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 initial
               )}
@@ -151,17 +144,7 @@ export default function Profile() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {message && (
-          <div className="md:col-span-3 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded text-sm">
-            {message}
-          </div>
-        )}
-        {error && (
-          <div className="md:col-span-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded text-sm">
-            {error}
-          </div>
-        )}
-
+        {/* Tarjeta: Datos de la cuenta */}
         <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
             Datos de la cuenta
@@ -180,10 +163,13 @@ export default function Profile() {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            <Button type="submit">Guardar cambios</Button>
+            <Button type="submit" isLoading={isSavingProfile}>
+              Guardar cambios
+            </Button>
           </form>
         </div>
 
+        {/* Tarjeta: Seguridad */}
         <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
             Seguridad
@@ -218,7 +204,7 @@ export default function Profile() {
                 required
               />
               <div className="flex gap-2 pt-2">
-                <Button type="submit" variant="danger">
+                <Button type="submit" variant="danger" isLoading={isChangingPass}>
                   Actualizar Contraseña
                 </Button>
                 <Button

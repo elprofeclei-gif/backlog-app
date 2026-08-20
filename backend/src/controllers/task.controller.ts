@@ -13,17 +13,22 @@ export const createTask = async (req: Request, res: Response) => {
   }
 };
 
+// Actualizar tarea (título, completado, lista, o fecha límite)
 export const updateTask = async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const { title, completed, listId } = req.body;
+  const { title, completed, listId, dueDate } = req.body; // <-- Agregamos dueDate
 
   try {
+    // Si dueDate viene vacío, lo guardamos como null, si no, lo convertimos a fecha
+    const formattedDueDate = dueDate ? new Date(dueDate) : null;
+
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
         title,
         completed,
-        listId, // Si se envía, actualiza la lista (para arrastrar)
+        listId,
+        dueDate: formattedDueDate, // <-- Guardamos la fecha
       },
     });
     res.json(updatedTask);

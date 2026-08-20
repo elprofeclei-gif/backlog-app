@@ -7,8 +7,11 @@ export const createBoard = async (req: Request, res: Response) => {
   const userId = req.userId!;
 
   try {
+    // Contamos cuántos tableros tiene el usuario para asignarle el orden siguiente
+    const boardCount = await prisma.board.count({ where: { userId } });
+
     const board = await prisma.board.create({
-      data: { title, color: color || 'blue', userId },
+      data: { title, color: color || 'blue', userId, order: boardCount },
     });
     res.status(201).json(board);
   } catch (error) {
@@ -31,7 +34,7 @@ export const getBoards = async (req: Request, res: Response) => {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
     });
     res.json(boards);
   } catch (error) {
@@ -99,5 +102,27 @@ export const updateBoard = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+// NUEVA FUNCIÓN: Reordenar tableros
+export const reorderBoards = async (req: Request, res: Response) => {
+  const { boards } = req.body; // Recibimos un array de objetos { id, order }
+  const userId = req.userId!;
+
+  try {
+    // Usamos una transacción para actualizar todos los tableros a la vez
+    const updatePromises = boards.map((board: { id: string; order: number }) =>
+      prisma.board.updateMany({
+        where: { id: board.id, userId }, // Verificamos que le pertenezca al usuario
+        data: { order: board.order },
+      })
+    );
+
+    await prisma.$transaction(updatePromises);
+    res.json({ message: 'Orden actualizado' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al reordenar tableros' });
   }
 };

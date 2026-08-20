@@ -36,6 +36,7 @@ export const useBoardController = (boardId: string) => {
       setLists((prev) => [...prev, { ...newList, tasks: [] }]);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -45,6 +46,7 @@ export const useBoardController = (boardId: string) => {
       setLists((prev) => prev.filter((l) => l.id !== id));
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -56,6 +58,7 @@ export const useBoardController = (boardId: string) => {
       );
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -66,6 +69,7 @@ export const useBoardController = (boardId: string) => {
       setBoard((prev) => (prev ? { ...prev, title: newTitle } : prev));
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -80,6 +84,7 @@ export const useBoardController = (boardId: string) => {
       );
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -93,6 +98,7 @@ export const useBoardController = (boardId: string) => {
       );
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -107,6 +113,39 @@ export const useBoardController = (boardId: string) => {
       );
     } catch (error) {
       console.error(error);
+      throw error;
+    }
+  };
+
+  const setTaskDueDate = async (taskId: string, dueDate: string | null) => {
+    try {
+      await TaskModel.update(taskId, { dueDate });
+      setLists((prev) =>
+        prev.map((list) => ({
+          ...list,
+          tasks: list.tasks.map((t) => (t.id === taskId ? { ...t, dueDate } : t)),
+        }))
+      );
+      return true;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const setTaskLabel = async (taskId: string, label: string | null) => {
+    try {
+      await TaskModel.update(taskId, { label });
+      setLists((prev) =>
+        prev.map((list) => ({
+          ...list,
+          tasks: list.tasks.map((t) => (t.id === taskId ? { ...t, label } : t)),
+        }))
+      );
+      return true;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
@@ -125,11 +164,29 @@ export const useBoardController = (boardId: string) => {
   };
 
   const onDragEnd = async (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    const { destination, source, draggableId, type } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index)
       return;
 
+    // LÓGICA PARA MOVER LISTAS
+    if (type === 'list') {
+      const newLists = Array.from(lists);
+      const [movedList] = newLists.splice(source.index, 1);
+      newLists.splice(destination.index, 0, movedList);
+
+      const newOrder = newLists.map((l, i) => ({ id: l.id, order: i }));
+      setLists(newLists);
+
+      try {
+        await ListModel.reorder(newOrder);
+      } catch (error) {
+        console.error('Error al reordenar listas', error);
+      }
+      return;
+    }
+
+    // LÓGICA PARA MOVER TARJETAS (Lo que ya teníamos)
     const sourceList = lists.find((l) => l.id === source.droppableId);
     const destList = lists.find((l) => l.id === destination.droppableId);
     if (!sourceList || !destList) return;
@@ -137,19 +194,12 @@ export const useBoardController = (boardId: string) => {
     const task = sourceList.tasks.find((t) => t.id === draggableId);
     if (!task) return;
 
-    // Actualizar estado local (Optimistic UI) corregido para misma lista
     setLists((prev) => {
       const newLists = prev.map((list) => {
-        if (list.id === source.droppableId) {
-          const newTasks = list.tasks.filter((t) => t.id !== draggableId);
-          // Si es la misma lista, insertar en la nueva posición aquí mismo
-          if (source.droppableId === destination.droppableId) {
-            newTasks.splice(destination.index, 0, task);
-          }
-          return { ...list, tasks: newTasks };
+        if (list.id === sourceList.id) {
+          return { ...list, tasks: list.tasks.filter((t) => t.id !== draggableId) };
         }
-        // Si es otra lista, insertar en la lista destino
-        if (list.id === destination.droppableId) {
+        if (list.id === destList.id) {
           const newTasks = [...list.tasks];
           newTasks.splice(destination.index, 0, task);
           return { ...list, tasks: newTasks };
@@ -159,12 +209,8 @@ export const useBoardController = (boardId: string) => {
       return newLists;
     });
 
-    // Actualizar backend
     try {
-      // Solo llamamos a la API si cambió de lista (nuestro backend aún no maneja orden internamente)
-      if (source.droppableId !== destination.droppableId) {
-        await TaskModel.update(draggableId, { listId: destination.droppableId });
-      }
+      await TaskModel.update(draggableId, { listId: destination.droppableId });
     } catch (error) {
       console.error('Error al mover tarea', error);
     }
@@ -181,6 +227,8 @@ export const useBoardController = (boardId: string) => {
     addTask,
     removeTask,
     editTask,
+    setTaskDueDate,
+    setTaskLabel,
     toggleComplete,
     onDragEnd,
   };

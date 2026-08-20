@@ -5,7 +5,8 @@ export interface Board {
   title: string;
   color: string;
   _count?: { tasks: number };
-  lists?: { _count: { tasks: number } }[]; // <-- Nuevo
+  lists?: { _count: { tasks: number } }[];
+  order?: number;
 }
 
 export const BoardModel = {
@@ -27,5 +28,8 @@ export const BoardModel = {
   },
   delete: async (id: string): Promise<void> => {
     await API.delete(`/boards/${id}`);
+  },
+  reorder: async (boards: { id: string; order: number }[]): Promise<void> => {
+    await API.put('/boards/reorder', { boards });
   },
 };

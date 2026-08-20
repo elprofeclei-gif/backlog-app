@@ -3,12 +3,12 @@ import { prisma } from '../lib/prisma';
 
 export const getLists = async (req: Request, res: Response) => {
   const boardId = req.params.boardId as string;
-  const userId = req.userId!;
+
   try {
     const lists = await prisma.list.findMany({
       where: { boardId },
       include: { tasks: true },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { order: 'asc' },
     });
     res.json(lists);
   } catch (error) {
@@ -18,11 +18,15 @@ export const getLists = async (req: Request, res: Response) => {
 
 export const createList = async (req: Request, res: Response) => {
   const { title, boardId } = req.body;
-  const userId = req.userId!;
   try {
-    const list = await prisma.list.create({ data: { title, boardId } });
+    // Contamos cuántas listas hay para asignarle el orden al final
+    const listCount = await prisma.list.count({ where: { boardId } });
+    const list = await prisma.list.create({
+      data: { title, boardId, order: listCount },
+    });
     res.status(201).json(list);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
@@ -50,5 +54,23 @@ export const updateList = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+// NUEVA FUNCIÓN: Reordenar listas
+export const reorderLists = async (req: Request, res: Response) => {
+  const { lists } = req.body; // Array de { id, order }
+  try {
+    const updatePromises = lists.map((list: { id: string; order: number }) =>
+      prisma.list.update({
+        where: { id: list.id },
+        data: { order: list.order },
+      })
+    );
+    await prisma.$transaction(updatePromises);
+    res.json({ message: 'Orden de listas actualizado' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al reordenar listas' });
   }
 };

@@ -29,6 +29,7 @@ model Board {
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lists       List[]
+  order       Int      @default(0) // <-- Nuevo campo de orden
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -39,6 +40,7 @@ model List {
   boardId   String
   board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   tasks     Task[]
+  order     Int      @default(0) // <-- Nuevo campo
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -46,11 +48,12 @@ model List {
 model Task {
   id        String   @id @default(uuid())
   title     String
-  completed Boolean  @default(false) // <-- Agregar esto
+  completed Boolean  @default(false)
   listId    String
   list      List     @relation(fields: [listId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  dueDate   DateTime? // <-- Nuevo campo de fecha límite (opcional)
 }
