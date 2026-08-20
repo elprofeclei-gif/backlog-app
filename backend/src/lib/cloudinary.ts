@@ -7,13 +7,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Agregar este log para ver qué valores está leyendo
-console.log('CLOUDINARY CONFIG:', {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET ? 'Cargada' : 'Falta',
-});
-
 export const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {

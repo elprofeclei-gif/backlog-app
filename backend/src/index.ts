@@ -36,18 +36,6 @@ app.use('/api/lists', listRoutes);
 // Documentación Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Manejador de errores global
-app.use((err: any, req: any, res: any, next: any) => {
-  // Convertimos todo el error a un texto legible
-  const errorString = JSON.stringify(err, Object.getOwnPropertyNames(err));
-  console.error('ERROR GLOBAL DETECTADO:', errorString);
-
-  res.status(500).json({
-    message: 'Error interno del servidor',
-    error: errorString, // Devolvemos el error como string
-  });
-});
-
 // Solo escuchamos si no estamos en modo test
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
