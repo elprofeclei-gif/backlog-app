@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -8,36 +11,67 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Logo from '../components/ui/Logo';
 
+// 1. Esquema base con las validaciones que comparten ambos modos
+const baseSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().min(1, 'El email es requerido').email('El email no es válido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+});
+
 export default function Login() {
   useDocumentTitle('Iniciar Sesión');
 
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // <-- Nuevo estado
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // 2. Generamos el esquema dinámicamente según el modo (Login o Registro)
+  const schema = useMemo(() => {
+    return baseSchema.superRefine((data, ctx) => {
+      // Si NO estamos en modo login y el nombre está vacío, lanzamos error
+      if (!isLogin && !data.name) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'El nombre es requerido',
+          path: ['name'],
+        });
+      }
+    });
+  }, [isLogin]);
+
+  type FormValues = z.infer<typeof baseSchema>;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    mode: 'onTouched',
+    delayError: 500,
+  });
+
+  const onSubmit = async (data: FormValues) => {
     setError('');
-    setIsLoading(true); // <-- Activar carga
+    setIsLoading(true);
 
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const payload = isLogin ? { email, password } : { email, password, name };
+      const payload = isLogin
+        ? { email: data.email, password: data.password }
+        : { email: data.email, password: data.password, name: data.name };
 
-      const { data } = await API.post(endpoint, payload);
-      auth.login(data.token);
+      const { data: resData } = await API.post(endpoint, payload);
+      auth.login(resData.token);
       navigate('/');
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Ocurrió un error');
     } finally {
-      setIsLoading(false); // <-- Siempre apagar la carga al terminar
+      setIsLoading(false);
     }
   };
 
@@ -91,31 +125,29 @@ export default function Login() {
           <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {!isLogin && (
             <Input
               label="Nombre completo"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              {...register('name')}
+              error={errors.name?.message}
             />
           )}
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <Input label="Email" type="email" {...register('email')} error={errors.email?.message} />
           <Input
             label="Contraseña"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            {...register('password')}
+            error={errors.password?.message}
           />
-          <Button type="submit" fullWidth isLoading={isLoading} className="text-base py-2.5">
+          <Button
+            type="submit"
+            fullWidth
+            isLoading={isLoading}
+            disabled={!isValid}
+            className="text-base py-2.5"
+          >
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </Button>
         </form>

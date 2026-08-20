@@ -65,8 +65,20 @@ export const useBoardController = (boardId: string) => {
   const editBoardTitle = async (newTitle: string) => {
     if (!board) return;
     try {
-      await BoardModel.update(board.id, newTitle);
+      await BoardModel.update(board.id, { title: newTitle });
       setBoard((prev) => (prev ? { ...prev, title: newTitle } : prev));
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  // NUEVA FUNCIÓN: Cambiar color del tablero
+  const editBoardColor = async (newColor: string) => {
+    if (!board) return;
+    try {
+      await BoardModel.update(board.id, { color: newColor });
+      setBoard((prev) => (prev ? { ...prev, color: newColor } : prev));
     } catch (error) {
       console.error(error);
       throw error;
@@ -169,15 +181,12 @@ export const useBoardController = (boardId: string) => {
     if (destination.droppableId === source.droppableId && destination.index === source.index)
       return;
 
-    // LÓGICA PARA MOVER LISTAS
     if (type === 'list') {
       const newLists = Array.from(lists);
       const [movedList] = newLists.splice(source.index, 1);
       newLists.splice(destination.index, 0, movedList);
-
       const newOrder = newLists.map((l, i) => ({ id: l.id, order: i }));
       setLists(newLists);
-
       try {
         await ListModel.reorder(newOrder);
       } catch (error) {
@@ -186,7 +195,6 @@ export const useBoardController = (boardId: string) => {
       return;
     }
 
-    // LÓGICA PARA MOVER TARJETAS (Lo que ya teníamos)
     const sourceList = lists.find((l) => l.id === source.droppableId);
     const destList = lists.find((l) => l.id === destination.droppableId);
     if (!sourceList || !destList) return;
@@ -196,11 +204,17 @@ export const useBoardController = (boardId: string) => {
 
     setLists((prev) => {
       const newLists = prev.map((list) => {
-        if (list.id === sourceList.id) {
+        if (list.id === source.droppableId) {
+          if (source.droppableId === destination.droppableId) {
+            const newTasks = Array.from(list.tasks);
+            newTasks.splice(source.index, 1);
+            newTasks.splice(destination.index, 0, task);
+            return { ...list, tasks: newTasks };
+          }
           return { ...list, tasks: list.tasks.filter((t) => t.id !== draggableId) };
         }
-        if (list.id === destList.id) {
-          const newTasks = [...list.tasks];
+        if (list.id === destination.droppableId) {
+          const newTasks = Array.from(list.tasks);
           newTasks.splice(destination.index, 0, task);
           return { ...list, tasks: newTasks };
         }
@@ -210,12 +224,15 @@ export const useBoardController = (boardId: string) => {
     });
 
     try {
-      await TaskModel.update(draggableId, { listId: destination.droppableId });
+      if (source.droppableId !== destination.droppableId) {
+        await TaskModel.update(draggableId, { listId: destination.droppableId });
+      }
     } catch (error) {
       console.error('Error al mover tarea', error);
     }
   };
 
+  // Retornamos la nueva función
   return {
     lists,
     board,
@@ -224,6 +241,7 @@ export const useBoardController = (boardId: string) => {
     removeList,
     editList,
     editBoardTitle,
+    editBoardColor,
     addTask,
     removeTask,
     editTask,

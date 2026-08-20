@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. Base de datos PostgreSQL local
+  db:
+    image: postgres:15-alpine
+    container_name: backlog_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: backlog
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. Backend (Node/Express)
+  backend:
+    build: ./backend
+    container_name: backlog_backend
+    ports:
+      - '3001:3001'
+    environment:
+      # Usamos la base de datos local de Docker
+      DATABASE_URL: 'postgresql://postgres:postgres@db:5432/backlog?schema=public'
+      PORT: 3001
+      # Variables de entorno leídas desde el archivo .env de la raíz
+      JWT_SECRET: ${JWT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # 3. Frontend (React/Vite)
+  frontend:
+    build: ./frontend
+    container_name: backlog_frontend
+    ports:
+      - '5173:5173'
+    environment:
+      # Vite se conecta al backend de Docker
+      VITE_API_URL: 'http://localhost:3001/api'
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

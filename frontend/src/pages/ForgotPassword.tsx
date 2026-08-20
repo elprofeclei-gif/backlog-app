@@ -1,23 +1,40 @@
 import { useState } from 'react';
 import API from '../api/axios';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 
+const schema = z.object({
+  email: z.string().min(1, 'El email es requerido').email('El email no es válido'),
+});
+
+type FormValues = z.infer<typeof schema>;
+
 export default function ForgotPassword() {
   useDocumentTitle('Recuperar Contraseña');
-  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    mode: 'onTouched',
+    delayError: 500,
+  });
+
+  const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     setMessage('');
 
     try {
-      const { data } = await API.post('/auth/forgot-password', { email });
-      setMessage(data.message);
+      const { data: resData } = await API.post('/auth/forgot-password', { email: data.email });
+      setMessage(resData.message);
     } catch {
       setMessage('Ocurrió un error.');
     } finally {
@@ -38,15 +55,9 @@ export default function ForgotPassword() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Button type="submit" fullWidth isLoading={isLoading}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input label="Email" type="email" {...register('email')} error={errors.email?.message} />
+          <Button type="submit" fullWidth isLoading={isLoading} disabled={!isValid}>
             Enviar Enlace
           </Button>
         </form>

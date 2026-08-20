@@ -26,6 +26,12 @@ export default function Home() {
     { id: 'orange', bg: 'bg-orange-600', hover: 'hover:bg-orange-700' },
     { id: 'pink', bg: 'bg-pink-600', hover: 'hover:bg-pink-700' },
     { id: 'indigo', bg: 'bg-indigo-600', hover: 'hover:bg-indigo-700' },
+    { id: 'red', bg: 'bg-red-600', hover: 'hover:bg-red-700' },
+    { id: 'teal', bg: 'bg-teal-600', hover: 'hover:bg-teal-700' },
+    { id: 'amber', bg: 'bg-amber-600', hover: 'hover:bg-amber-700' },
+    { id: 'cyan', bg: 'bg-cyan-600', hover: 'hover:bg-cyan-700' },
+    { id: 'rose', bg: 'bg-rose-600', hover: 'hover:bg-rose-700' },
+    { id: 'slate', bg: 'bg-slate-600', hover: 'hover:bg-slate-700' },
   ];
 
   useEffect(() => {
@@ -44,7 +50,10 @@ export default function Home() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBoardTitle.trim()) return;
+    if (!newBoardTitle.trim()) {
+      toast.error('El título es obligatorio');
+      return;
+    }
     setIsCreating(true);
     try {
       const newBoard = await BoardModel.create(newBoardTitle, newBoardColor);
@@ -175,11 +184,13 @@ export default function Home() {
                                         <button
                                           onClick={async () => {
                                             toast.dismiss(t.id);
+                                            const prevBoards = boards;
+                                            setBoards(boards.filter((b) => b.id !== board.id));
                                             try {
                                               await BoardModel.delete(board.id);
-                                              setBoards(boards.filter((b) => b.id !== board.id));
                                               toast.success('Tablero eliminado');
                                             } catch {
+                                              setBoards(prevBoards);
                                               toast.error('Error al eliminar');
                                             }
                                           }}
@@ -211,8 +222,14 @@ export default function Home() {
       </main>
 
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowCreateForm(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
               Crear nuevo tablero
             </h3>
@@ -234,13 +251,13 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Color de fondo
                 </label>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-6 gap-2">
                   {colors.map((color) => (
                     <button
                       key={color.id}
                       type="button"
                       onClick={() => setNewBoardColor(color.id)}
-                      className={`w-8 h-8 rounded-full ${color.bg} ${newBoardColor === color.id ? 'ring-2 ring-gray-800 dark:ring-white ring-offset-2 dark:ring-offset-gray-800' : ''}`}
+                      className={`w-8 h-8 rounded-full ${color.bg} ${newBoardColor === color.id ? 'ring-2 ring-offset-2 ring-gray-800 dark:ring-white dark:ring-offset-gray-800' : ''}`}
                     />
                   ))}
                 </div>

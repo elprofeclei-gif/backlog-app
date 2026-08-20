@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserModel } from '../models/user.model';
-import type { AxiosError } from 'axios';
-import toast from 'react-hot-toast'; // <-- Nuevo
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import toast from 'react-hot-toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import UserMenu from '../components/layout/UserMenu';
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, 'La contraseña actual es requerida'),
+  newPassword: z.string().min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
+});
+
+type PasswordValues = z.infer<typeof passwordSchema>;
 
 export default function Profile() {
   useDocumentTitle('Mi Perfil');
@@ -17,11 +26,19 @@ export default function Profile() {
   const [role, setRole] = useState('');
   const [image, setImage] = useState<string | null>(null);
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isChangingPass, setIsChangingPass] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  const {
+    register: registerPass,
+    handleSubmit: handlePassSubmit,
+    formState: { errors: passErrors, isValid: isPassValid },
+    reset: resetPass,
+  } = useForm<PasswordValues>({
+    resolver: zodResolver(passwordSchema),
+    mode: 'onTouched',
+    delayError: 500,
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,28 +56,23 @@ export default function Profile() {
     setIsSavingProfile(true);
     try {
       await UserModel.updateMe(name);
-      toast.success('Perfil actualizado correctamente'); // <-- Toast
+      toast('Perfil actualizado correctamente'); // Toast Azul (Informativo)
     } catch {
-      toast.error('Error al actualizar perfil'); // <-- Toast
+      toast.error('Error al actualizar perfil');
     } finally {
       setIsSavingProfile(false);
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsChangingPass(true);
+  const handleChangePassword = async (data: PasswordValues) => {
     try {
-      await UserModel.changePassword(currentPassword, newPassword);
-      toast.success('Contraseña actualizada correctamente'); // <-- Toast
-      setCurrentPassword('');
-      setNewPassword('');
+      await UserModel.changePassword(data.currentPassword, data.newPassword);
+      toast('Contraseña actualizada correctamente'); // Toast Azul (Informativo)
+      resetPass();
       setShowPasswordForm(false);
     } catch (err) {
-      const axiosError = err as AxiosError<{ message: string }>;
-      toast.error(axiosError.response?.data?.message || 'Error al cambiar contraseña'); // <-- Toast
-    } finally {
-      setIsChangingPass(false);
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Error al cambiar contraseña');
     }
   };
 
@@ -71,9 +83,9 @@ export default function Profile() {
     try {
       const updatedUser = await UserModel.uploadAvatar(file);
       setImage(updatedUser.image);
-      toast.success('Foto de perfil actualizada'); // <-- Toast
+      toast('Foto de perfil actualizada'); // Toast Azul (Informativo)
     } catch {
-      toast.error('Error al subir la imagen'); // <-- Toast
+      toast.error('Error al subir la imagen');
     }
   };
 
@@ -144,7 +156,6 @@ export default function Profile() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Tarjeta: Datos de la cuenta */}
         <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
             Datos de la cuenta
@@ -169,7 +180,6 @@ export default function Profile() {
           </form>
         </div>
 
-        {/* Tarjeta: Seguridad */}
         <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
             Seguridad
@@ -188,29 +198,33 @@ export default function Profile() {
               </Button>
             </div>
           ) : (
-            <form onSubmit={handleChangePassword} className="space-y-4 pt-4 transition-all">
+            <form
+              onSubmit={handlePassSubmit(handleChangePassword)}
+              className="space-y-4 pt-4 transition-all"
+            >
               <Input
                 label="Contraseña Actual"
                 type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
+                {...registerPass('currentPassword')}
+                error={passErrors.currentPassword?.message}
               />
               <Input
                 label="Nueva Contraseña"
                 type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
+                {...registerPass('newPassword')}
+                error={passErrors.newPassword?.message}
               />
               <div className="flex gap-2 pt-2">
-                <Button type="submit" variant="danger" isLoading={isChangingPass}>
+                <Button type="submit" variant="danger" disabled={!isPassValid}>
                   Actualizar Contraseña
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setShowPasswordForm(false)}
+                  onClick={() => {
+                    setShowPasswordForm(false);
+                    resetPass();
+                  }}
                 >
                   Cancelar
                 </Button>

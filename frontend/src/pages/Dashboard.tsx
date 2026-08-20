@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useBoardController } from '../controllers/useBoard';
 import type { Task } from '../models/task.model';
@@ -14,7 +14,28 @@ const boardColors: Record<string, string> = {
   orange: 'bg-orange-800',
   pink: 'bg-pink-800',
   indigo: 'bg-indigo-800',
+  red: 'bg-red-800',
+  teal: 'bg-teal-800',
+  amber: 'bg-amber-800',
+  cyan: 'bg-cyan-800',
+  rose: 'bg-rose-800',
+  slate: 'bg-slate-800',
 };
+
+const swatchColors = [
+  'blue',
+  'green',
+  'purple',
+  'orange',
+  'pink',
+  'indigo',
+  'red',
+  'teal',
+  'amber',
+  'cyan',
+  'rose',
+  'slate',
+];
 
 const labelColors: Record<string, string> = {
   red: 'bg-red-500',
@@ -27,6 +48,9 @@ const labelColors: Record<string, string> = {
 export default function Dashboard() {
   const [newListTitle, setNewListTitle] = useState('');
   const [addingList, setAddingList] = useState(false);
+  const [isPickingColor, setIsPickingColor] = useState(false);
+  const listFormRef = useRef<HTMLDivElement>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
 
   const { id: boardId } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -39,6 +63,7 @@ export default function Dashboard() {
     removeList,
     editList,
     editBoardTitle,
+    editBoardColor,
     addTask,
     removeTask,
     editTask,
@@ -51,8 +76,35 @@ export default function Dashboard() {
   const totalLists = lists.length;
   const totalTasks = lists.reduce((acc, list) => acc + list.tasks.length, 0);
 
+  useEffect(() => {
+    if (!addingList && !isPickingColor) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        addingList &&
+        listFormRef.current &&
+        !listFormRef.current.contains(event.target as Node)
+      ) {
+        setAddingList(false);
+        setNewListTitle('');
+      }
+      if (
+        isPickingColor &&
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target as Node)
+      ) {
+        setIsPickingColor(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [addingList, isPickingColor]);
+
   const handleAddList = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newListTitle.trim()) {
+      toast.error('El título es obligatorio');
+      return;
+    }
     try {
       await addList(newListTitle);
       toast.success('Lista creada');
@@ -66,8 +118,10 @@ export default function Dashboard() {
   const bgColor = board ? boardColors[board.color] || 'bg-blue-800' : 'bg-blue-800';
 
   return (
-    <div className={`min-h-screen ${bgColor} text-white flex flex-col`}>
-      <nav className="bg-black/20 backdrop-blur-sm p-4 flex justify-between items-center flex-wrap gap-4">
+    <div
+      className={`min-h-screen ${bgColor} text-white flex flex-col transition-colors duration-300`}
+    >
+      <nav className="bg-black/20 backdrop-blur-sm p-4 flex justify-between items-center flex-wrap gap-4 relative z-30">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
@@ -80,13 +134,48 @@ export default function Dashboard() {
             onEdit={async (newTitle) => {
               try {
                 await editBoardTitle(newTitle);
-                toast.success('Tablero actualizado');
+                toast('Tablero actualizado');
               } catch {
                 toast.error('Error al actualizar tablero');
               }
             }}
             className="text-xl font-bold text-white hover:bg-white/20 px-2 py-1 rounded transition-colors"
           />
+
+          {/* BOTÓN DE PALETA DE COLORES PROFESIONAL */}
+          <div className="relative" ref={colorPickerRef}>
+            <button
+              onClick={() => setIsPickingColor(!isPickingColor)}
+              className="flex items-center gap-1.5 text-white/80 hover:text-white px-2 py-1 rounded-md hover:bg-white/20 transition-colors text-sm font-medium"
+            >
+              🎨 <span className="hidden sm:inline">Fondo</span>
+            </button>
+
+            {isPickingColor && (
+              <div className="absolute top-12 left-0 w-56 bg-white dark:bg-gray-800 p-3 rounded-xl shadow-2xl z-50 border border-gray-200 dark:border-gray-700">
+                <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">
+                  Color del tablero
+                </h4>
+                <div className="grid grid-cols-4 gap-2">
+                  {swatchColors.map((c) => (
+                    <button
+                      key={c}
+                      onClick={async () => {
+                        try {
+                          await editBoardColor(c);
+                          toast('Color actualizado');
+                        } catch {
+                          toast.error('Error al actualizar color');
+                        }
+                        setIsPickingColor(false);
+                      }}
+                      className={`w-9 h-9 rounded-lg ${boardColors[c]} transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 ${board?.color === c ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -106,7 +195,7 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="p-4 flex-1 overflow-x-auto">
+      <div className="p-4 flex-1 overflow-x-auto relative z-0">
         {loading ? (
           <div className="flex gap-3 items-start">
             {[...Array(3)].map((_, i) => (
@@ -123,15 +212,13 @@ export default function Dashboard() {
           </div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
-            {/* Contenedor flex que agrupa las listas y el botón en una sola fila */}
-            <div className="flex gap-3 items-start">
-              {/* DROPPABLE PARA LISTAS */}
+            <div className="flex flex-col md:flex-row gap-3 items-start">
               <Droppable droppableId="all-lists" direction="horizontal" type="list">
                 {(provided) => (
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className="flex gap-3 items-start"
+                    className="flex flex-col md:flex-row gap-3 items-start"
                   >
                     {lists.map((list, index) => (
                       <Draggable draggableId={list.id} index={index} key={list.id}>
@@ -141,7 +228,7 @@ export default function Dashboard() {
                             {...dragProvided.draggableProps}
                             {...dragProvided.dragHandleProps}
                           >
-                            <div className="w-72 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg flex flex-col max-h-[80vh]">
+                            <div className="w-full md:w-72 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg flex flex-col max-h-[80vh]">
                               <div className="p-3 flex justify-between items-center gap-2">
                                 <div className="flex items-center gap-2 flex-1">
                                   <EditableText
@@ -149,7 +236,7 @@ export default function Dashboard() {
                                     onEdit={async (newTitle) => {
                                       try {
                                         await editList(list.id, newTitle);
-                                        toast.success('Lista actualizada');
+                                        toast('Lista actualizada');
                                       } catch {
                                         toast.error('Error al actualizar lista');
                                       }
@@ -202,7 +289,6 @@ export default function Dashboard() {
                                 </button>
                               </div>
 
-                              {/* DROPPABLE PARA TARJETAS DENTRO DE LA LISTA */}
                               <Droppable droppableId={list.id} type="task">
                                 {(prov) => (
                                   <div
@@ -253,36 +339,37 @@ export default function Dashboard() {
                 )}
               </Droppable>
 
-              {/* BOTÓN PARA AÑADIR LISTA (Ahora está dentro del mismo flex) */}
-              <div className="w-72 flex-shrink-0">
+              <div className="w-full md:w-72 flex-shrink-0 mt-0" ref={listFormRef}>
                 {addingList ? (
-                  <form
-                    onSubmit={handleAddList}
-                    className="bg-gray-100 dark:bg-gray-800 p-3 rounded shadow-lg"
-                  >
-                    <input
-                      autoFocus
-                      value={newListTitle}
-                      onChange={(e) => setNewListTitle(e.target.value)}
-                      placeholder="Introduce el título de la lista..."
-                      className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold"
-                      >
-                        Añadir lista
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAddingList(false)}
-                        className="text-gray-600 dark:text-gray-300 hover:text-gray-900 px-2"
-                      >
-                        ✖
-                      </button>
-                    </div>
-                  </form>
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded shadow-lg">
+                    <form onSubmit={handleAddList}>
+                      <input
+                        autoFocus
+                        value={newListTitle}
+                        onChange={(e) => setNewListTitle(e.target.value)}
+                        placeholder="Introduce el título de la lista..."
+                        className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          type="submit"
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold"
+                        >
+                          Añadir lista
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAddingList(false);
+                            setNewListTitle('');
+                          }}
+                          className="text-gray-600 dark:text-gray-300 hover:text-gray-900 px-2"
+                        >
+                          ✖
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 ) : (
                   <button
                     onClick={() => setAddingList(true)}
@@ -384,7 +471,7 @@ function TaskItem({
     e.stopPropagation();
     try {
       await onEdit(task.id, title);
-      toast.success('Tarjeta actualizada');
+      toast('Tarjeta actualizada');
     } catch {
       toast.error('Error al actualizar');
     } finally {
@@ -443,7 +530,6 @@ function TaskItem({
       {...dragHandleProps}
       className="bg-white dark:bg-gray-700 p-2 rounded shadow-sm mb-2 cursor-grab active:cursor-grabbing relative overflow-hidden"
     >
-      {/* Barra de etiqueta de color arriba de la tarjeta */}
       {task.label && (
         <div className={`absolute top-0 left-0 w-full h-1.5 ${labelColors[task.label]}`}></div>
       )}
@@ -492,7 +578,6 @@ function TaskItem({
           </div>
 
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-            {/* Botón de Etiqueta */}
             {isPickingLabel ? (
               <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded">
                 <button
@@ -500,7 +585,7 @@ function TaskItem({
                     e.stopPropagation();
                     await onSetLabel(task.id, null);
                     setIsPickingLabel(false);
-                    toast.success('Etiqueta quitada');
+                    toast('Etiqueta quitada');
                   }}
                   className="text-xs text-gray-500 hover:text-red-500 px-1"
                 >
@@ -513,7 +598,7 @@ function TaskItem({
                       e.stopPropagation();
                       await onSetLabel(task.id, key);
                       setIsPickingLabel(false);
-                      toast.success('Etiqueta actualizada');
+                      toast('Etiqueta actualizada');
                     }}
                     className={`w-4 h-4 rounded-full ${value} hover:scale-110 transition-transform`}
                   />
@@ -531,7 +616,6 @@ function TaskItem({
               </button>
             )}
 
-            {/* Botón de Fecha Límite (Due Date) */}
             {isPickingDate ? (
               <div className="flex items-center gap-1">
                 <input
@@ -540,7 +624,7 @@ function TaskItem({
                   onChange={async (e) => {
                     try {
                       await onSetDueDate(task.id, e.target.value || null);
-                      toast.success('Fecha actualizada');
+                      toast('Fecha actualizada');
                     } catch {
                       toast.error('Error al guardar fecha');
                     }
@@ -578,30 +662,45 @@ function TaskItem({
 function AddCardForm({ onAdd }: { onAdd: (title: string) => Promise<void> }) {
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!adding) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setAdding(false);
+        setTitle('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [adding]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim()) {
-      try {
-        await onAdd(title);
-        setTitle('');
-        setAdding(false);
-      } catch {
-        // El error ya lo maneja el padre con el toast
-      }
+    if (!title.trim()) return;
+    try {
+      await onAdd(title);
+      setTitle('');
+      setAdding(false);
+    } catch {
+      // El error ya lo maneja el padre
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      if (title.trim()) handleSubmit(e);
+    }
+    if (e.key === 'Escape') {
+      setAdding(false);
     }
   };
 
   if (adding) {
     return (
-      <form onSubmit={handleSubmit} className="p-2">
+      <form onSubmit={handleSubmit} ref={formRef} className="p-2">
         <textarea
           autoFocus
           value={title}

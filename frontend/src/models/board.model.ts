@@ -22,9 +22,10 @@ export const BoardModel = {
     const { data } = await API.post('/boards', { title, color });
     return data;
   },
-  update: async (id: string, title: string): Promise<Board> => {
-    const { data } = await API.put(`/boards/${id}`, { title });
-    return data;
+  // Actualizamos para recibir un objeto con título y/o color
+  update: async (id: string, data: { title?: string; color?: string }): Promise<Board> => {
+    const { data: resData } = await API.put(`/boards/${id}`, data);
+    return resData;
   },
   delete: async (id: string): Promise<void> => {
     await API.delete(`/boards/${id}`);

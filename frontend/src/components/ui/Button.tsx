@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes } from 'react';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'danger' | 'secondary';
   fullWidth?: boolean;
-  isLoading?: boolean; // <-- Nuevo
+  isLoading?: boolean;
 }
 
 export default function Button({
@@ -11,17 +11,21 @@ export default function Button({
   variant = 'primary',
   fullWidth = false,
   isLoading = false,
-  className = '',
   disabled,
+  className = '',
   ...props
 }: ButtonProps) {
   const baseClasses =
     'p-2 rounded font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2';
 
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
-    danger: 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-400',
+    // Azul claro y translúcido en modo oscuro cuando está deshabilitado
+    primary:
+      'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 disabled:bg-blue-400 dark:disabled:bg-blue-500/40 disabled:cursor-not-allowed',
+    danger:
+      'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 disabled:bg-red-400 dark:disabled:bg-red-500/40 disabled:cursor-not-allowed',
+    secondary:
+      'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
@@ -32,7 +36,6 @@ export default function Button({
       disabled={disabled || isLoading}
       {...props}
     >
-      {/* Spinner de carga */}
       {isLoading && (
         <svg
           className="animate-spin h-4 w-4 text-current"

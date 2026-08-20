@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
-import { Toaster } from 'react-hot-toast'; // <-- Nuevo
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthProvider';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
@@ -18,11 +18,39 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <>
-      {/* Contenedor de las notificaciones */}
       <Toaster
         position="top-right"
         toastOptions={{
-          className: 'dark:bg-gray-800 dark:text-white',
+          success: {
+            icon: '✅',
+            style: {
+              background: '#10B981',
+              color: '#FFFFFF',
+              fontWeight: '600',
+              borderRadius: '8px',
+              padding: '12px 16px',
+            },
+          },
+          error: {
+            icon: '❌',
+            style: {
+              background: '#EF4444',
+              color: '#FFFFFF',
+              fontWeight: '600',
+              borderRadius: '8px',
+              padding: '12px 16px',
+            },
+          },
+          blank: {
+            icon: 'ℹ️',
+            style: {
+              background: '#3B82F6',
+              color: '#FFFFFF',
+              fontWeight: '600',
+              borderRadius: '8px',
+              padding: '12px 16px',
+            },
+          },
         }}
       />
 
