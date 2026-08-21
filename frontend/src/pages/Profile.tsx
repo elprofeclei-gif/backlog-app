@@ -10,7 +10,6 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import UserMenu from '../components/layout/UserMenu';
 
-/// Esquema con validación de que no sean iguales
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, 'La contraseña actual es requerida'),
@@ -33,8 +32,9 @@ export default function Profile() {
   const [image, setImage] = useState<string | null>(null);
 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isChangingPass, setIsChangingPass] = useState(false); // <-- Agrega esta línea
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [isChangingPass, setIsChangingPass] = useState(false);
+
   const {
     register: registerPass,
     handleSubmit: handlePassSubmit,
@@ -62,15 +62,16 @@ export default function Profile() {
     setIsSavingProfile(true);
     try {
       await UserModel.updateMe(name);
-      toast('Perfil actualizado correctamente'); // Toast Azul (Informativo)
+      toast('Perfil actualizado correctamente');
     } catch {
       toast.error('Error al actualizar perfil');
     } finally {
       setIsSavingProfile(false);
     }
   };
+
   const handleChangePassword = async (data: PasswordValues) => {
-    setIsChangingPass(true); // <-- Activar loader
+    setIsChangingPass(true);
     try {
       await UserModel.changePassword(data.currentPassword, data.newPassword);
       toast('Contraseña actualizada correctamente');
@@ -80,7 +81,7 @@ export default function Profile() {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error.response?.data?.message || 'Error al cambiar contraseña');
     } finally {
-      setIsChangingPass(false); // <-- Apagar loader al terminar
+      setIsChangingPass(false);
     }
   };
 
@@ -91,7 +92,7 @@ export default function Profile() {
     try {
       const updatedUser = await UserModel.uploadAvatar(file);
       setImage(updatedUser.image);
-      toast('Foto de perfil actualizada'); // Toast Azul (Informativo)
+      toast('Foto de perfil actualizada');
     } catch {
       toast.error('Error al subir la imagen');
     }

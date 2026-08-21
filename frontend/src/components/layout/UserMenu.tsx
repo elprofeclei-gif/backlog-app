@@ -40,7 +40,6 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
 
   return (
     <div className="flex items-center gap-2">
-      {/* Botón de Tema (Modo Oscuro/Claro) */}
       <button onClick={toggleTheme} className={btnClasses}>
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
@@ -57,7 +56,6 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
             )}
           </div>
           <span className={nameClasses}>{user?.name || user?.email}</span>
-          {/* Flecha que rota al abrir el menú */}
           <svg
             className={`w-4 h-4 ${transparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'} transition-transform ${showMenu ? 'rotate-180' : ''}`}
             fill="none"
@@ -70,10 +68,8 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
 
         {showMenu && (
           <>
-            {/* Fondo invisible para cerrar al hacer clic fuera */}
             <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}></div>
 
-            {/* Menú Desplegable Profesional */}
             <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold overflow-hidden">
@@ -92,8 +88,37 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
               </div>
 
               <div className="py-1">
+                {/* Botón de Panel de Admin - Solo si es ADMIN */}
+                {user?.role === 'ADMIN' && (
+                  <button
+                    onClick={() => {
+                      navigate('/admin');
+                      setShowMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <svg
+                      className="w-4 h-4 text-purple-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                    Panel de Admin
+                  </button>
+                )}
+
                 <button
-                  onClick={() => navigate('/profile')}
+                  onClick={() => {
+                    navigate('/profile');
+                    setShowMenu(false);
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <svg

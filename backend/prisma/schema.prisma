@@ -55,5 +55,6 @@ model Task {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  dueDate   DateTime? // <-- Nuevo campo de fecha límite (opcional)
+  dueDate   DateTime?
+  label     String?
 }

@@ -12,6 +12,9 @@ import {
   updateUser,
   deleteUser,
   uploadAvatar,
+  getDatabaseBackup,
+  getActivityReport,
+  getSystemStats,
 } from '../controllers/user.controller';
 
 const router = Router();
@@ -102,8 +105,55 @@ router.put('/password', authMiddleware, changePassword);
  *         description: Avatar actualizado
  */
 router.post('/avatar', authMiddleware, upload.single('avatar'), uploadAvatar);
+// --- RUTAS DE ADMIN (ESTÁTICAS) ---
+/**
+ * @swagger
+ * /api/users/backup:
+ *   get:
+ *     summary: Descargar respaldo de la base de datos (Solo Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: format
+ *         schema:
+ *           type: string
+ *           enum: [json, csv]
+ *     responses:
+ *       200:
+ *         description: Archivo de respaldo descargado
+ */
+router.get('/backup', authMiddleware, adminMiddleware, getDatabaseBackup);
 
-// --- RUTAS DE ADMIN ---
+/**
+ * @swagger
+ * /api/users/report/activity:
+ *   get:
+ *     summary: Descargar reporte de actividad de usuarios en CSV (Solo Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Archivo CSV descargado
+ */
+router.get('/report/activity', authMiddleware, adminMiddleware, getActivityReport);
+
+/**
+ * @swagger
+ * /api/users/stats:
+ *   get:
+ *     summary: Obtener estadísticas generales del sistema (Solo Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas del sistema
+ */
+router.get('/stats', authMiddleware, adminMiddleware, getSystemStats);
+// --- RUTAS DE ADMIN (DINÁMICAS) ---
 
 /**
  * @swagger
