@@ -10,15 +10,15 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import UserMenu from '../components/layout/UserMenu';
 
-// Esquema con validación de que no sean iguales
+/// Esquema con validación de que no sean iguales
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, 'La contraseña actual es requerida'),
     newPassword: z.string().min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
   })
-  .refine((data) => data.currentPassword === data.newPassword, {
+  .refine((data) => data.currentPassword !== data.newPassword, {
     message: 'La nueva contraseña no puede ser igual a la actual',
-    path: ['newPassword'], // El error se muestra debajo del campo de nueva contraseña
+    path: ['newPassword'],
   });
 
 type PasswordValues = z.infer<typeof passwordSchema>;
@@ -33,8 +33,8 @@ export default function Profile() {
   const [image, setImage] = useState<string | null>(null);
 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isChangingPass, setIsChangingPass] = useState(false); // <-- Agrega esta línea
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-
   const {
     register: registerPass,
     handleSubmit: handlePassSubmit,
@@ -69,16 +69,18 @@ export default function Profile() {
       setIsSavingProfile(false);
     }
   };
-
   const handleChangePassword = async (data: PasswordValues) => {
+    setIsChangingPass(true); // <-- Activar loader
     try {
       await UserModel.changePassword(data.currentPassword, data.newPassword);
-      toast('Contraseña actualizada correctamente'); // Toast Azul (Informativo)
+      toast('Contraseña actualizada correctamente');
       resetPass();
       setShowPasswordForm(false);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error.response?.data?.message || 'Error al cambiar contraseña');
+    } finally {
+      setIsChangingPass(false); // <-- Apagar loader al terminar
     }
   };
 
@@ -221,7 +223,12 @@ export default function Profile() {
                 error={passErrors.newPassword?.message}
               />
               <div className="flex gap-2 pt-2">
-                <Button type="submit" variant="danger" disabled={!isPassValid}>
+                <Button
+                  type="submit"
+                  variant="danger"
+                  disabled={!isPassValid || isChangingPass}
+                  isLoading={isChangingPass}
+                >
                   Actualizar Contraseña
                 </Button>
                 <Button
