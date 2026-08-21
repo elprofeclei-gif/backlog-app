@@ -42,12 +42,10 @@ export const login = async (req: Request, res: Response) => {
 
     // NUEVO: Verificar si el usuario tiene contraseña (si no se registró con Google)
     if (!user.password) {
-      return res
-        .status(400)
-        .json({
-          message:
-            'Esta cuenta se registró con Google. Por favor, inicia sesión con el botón de Google.',
-        });
+      return res.status(400).json({
+        message:
+          'Esta cuenta se registró con Google. Por favor, inicia sesión con el botón de Google.',
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password); // Aquí ya no dará error
@@ -90,18 +88,24 @@ export const forgotPassword = async (req: Request, res: Response) => {
 };
 
 // POST /api/auth/reset-password
+// En auth.controller.ts -> resetPassword
 export const resetPassword = async (req: Request, res: Response) => {
   const { token, newPassword } = req.body;
   try {
     const user = await prisma.user.findFirst({
-      where: {
-        resetToken: token,
-        resetTokenExpiry: { gt: new Date() }, // gt = mayor que ahora
-      },
+      where: { resetToken: token, resetTokenExpiry: { gt: new Date() } },
     });
 
-    if (!user) {
-      return res.status(400).json({ message: 'Token inválido o expirado.' });
+    if (!user) return res.status(400).json({ message: 'Token inválido o expirado.' });
+    if (!user.password)
+      return res.status(400).json({ message: 'Esta cuenta no usa contraseña. Usa Google.' });
+
+    // NUEVA VALIDACIÓN: Verificar que la nueva no sea igual a la vieja
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res
+        .status(400)
+        .json({ message: 'La nueva contraseña no puede ser igual a la anterior' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -109,11 +113,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        resetToken: null,
-        resetTokenExpiry: null,
-      },
+      data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
     });
 
     res.json({ message: 'Contraseña actualizada correctamente.' });

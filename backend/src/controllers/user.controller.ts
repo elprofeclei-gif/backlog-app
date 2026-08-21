@@ -31,22 +31,26 @@ export const updateMe = async (req: Request, res: Response) => {
   }
 };
 
+// En user.controller.ts -> changePassword
 export const changePassword = async (req: Request, res: Response) => {
   const userId = req.userId!;
   const { currentPassword, newPassword } = req.body;
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
-
-    // ¡ESTO ES LO QUE FALTA AGREGAR!
-    if (!user.password) {
-      return res
-        .status(400)
-        .json({ message: 'Esta cuenta no usa contraseña. Inicia sesión con Google.' });
-    }
+    if (!user.password)
+      return res.status(400).json({ message: 'Esta cuenta usa Google. Inicia sesión con Google.' });
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
+
+    // NUEVA VALIDACIÓN: Verificar que la nueva no sea igual a la vieja
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res
+        .status(400)
+        .json({ message: 'La nueva contraseña no puede ser igual a la actual' });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
