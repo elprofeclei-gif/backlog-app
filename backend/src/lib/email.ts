@@ -14,7 +14,8 @@ const getResendInstance = () => {
 };
 
 export const sendResetEmail = async (to: string, token: string) => {
-  const resetUrl = `http://localhost:5173/reset-password?token=${token}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
   const resend = getResendInstance();
 
