@@ -10,10 +10,16 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import UserMenu from '../components/layout/UserMenu';
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, 'La contraseña actual es requerida'),
-  newPassword: z.string().min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
-});
+// Esquema con validación de que no sean iguales
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'La contraseña actual es requerida'),
+    newPassword: z.string().min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
+  })
+  .refine((data) => data.currentPassword === data.newPassword, {
+    message: 'La nueva contraseña no puede ser igual a la actual',
+    path: ['newPassword'], // El error se muestra debajo del campo de nueva contraseña
+  });
 
 type PasswordValues = z.infer<typeof passwordSchema>;
 
