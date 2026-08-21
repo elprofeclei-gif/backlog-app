@@ -1,21 +1,22 @@
 📋 Backlog App (Trello Clone)
 CI PipelineReactTypeScriptNode.jsExpressPrismaPostgreSQLTailwindCSS
 
-Aplicación full-stack de gestión de tareas estilo Kanban (similar a Trello). Permite a los usuarios crear múltiples tableros, listas y tarjetas, así como arrastrar y soltar tarjetas entre listas para organizar su flujo de trabajo de forma visual y dinámica.
+Aplicación full-stack de gestión de tareas estilo Kanban (similar a Trello). Permite a los usuarios crear múltiples tableros, listas y tarjetas, arrastrar y soltar para reorganizar, y gestionar su flujo de trabajo de forma visual y dinámica.
 
 🚀 Ver aplicación en vivo: https://backlog-app-self.vercel.app/login
 
 ✨ Características Principales
-Autenticación Múltiple: Inicio de sesión con Email/Contraseña (JWT + Bcrypt) e integración de Google OAuth 2.0.
-Roles de Usuario: Sistema de permisos (ADMIN / USER). El primer usuario registrado es automáticamente Administrador.
-Tableros Dinámicos: Crea, edita y elimina tableros con colores personalizables.
-Listas y Tarjetas (CRUD): Crea listas dentro de los tableros y tarjetas dentro de las listas.
-Drag & Drop (Arrastrar y Soltar): Mueve las tarjetas entre listas o reordénalas dentro de la misma lista de forma fluida.
+Autenticación Múltiple: Email/Contraseña (JWT + Bcrypt) e integración de Google OAuth 2.0.
+Roles de Usuario: Sistema de permisos (ADMIN / USER). El primer usuario es automáticamente Administrador.
+Tableros Dinámicos: Crea, edita, elimina y reordena tableros arrastrándolos. Personaliza el color de fondo de cada tablero (12 colores disponibles).
+Listas y Tarjetas (CRUD): Crea listas y tarjetas. Arrastra y suelta para reordenarlas dentro de la misma lista o moverlas entre listas.
+Etiquetas y Fechas: Asigna etiquetas de color y fechas de vencimiento a las tarjetas (se ponen en rojo si vencen).
 Edición Inline: Edita los títulos de tableros, listas y tarjetas con un solo clic.
-Gestión de Perfil: Cambio de nombre de usuario, avatar (subida de imágenes) y cambio de contraseña con validación.
-Recuperación de Contraseña: Flujo completo de "Olvidé mi contraseña" mediante envío de correos electrónicos (Resend).
-Interfaz Moderna: Diseño responsivo construido con Tailwind CSS, incluyendo Modo Oscuro/Claro.
+Gestión de Perfil: Cambio de nombre, avatar (Cloudinary) y contraseña con validación estricta.
+Recuperación de Contraseña: Flujo completo mediante envío de correos electrónicos (Resend).
+Interfaz Moderna: Diseño responsivo construido con Tailwind CSS, incluye Modo Oscuro/Claro, Skeleton Loaders, Notificaciones Toast y validación de formularios (React Hook Form + Zod).
 API Documentada: Documentación interactiva con Swagger UI.
+Monitoreo: Captura de errores en tiempo real con Sentry.
 🛠️ Stack Tecnológico
 Frontend:
 
@@ -24,6 +25,7 @@ TypeScript
 Tailwind CSS
 React Router DOM
 @hello-pangea/dnd (Drag & Drop)
+React Hook Form + Zod (Validación)
 Axios
 Vitest + Testing Library (Unit Testing)
 Backend:
@@ -32,7 +34,7 @@ Node.js + Express
 TypeScript
 Prisma ORM
 JWT (Autenticación)
-Multer (Subida de archivos)
+Multer + Cloudinary (Subida de archivos)
 Google Auth Library (OAuth)
 Resend (Servicio de correos)
 Swagger (Documentación API)
@@ -40,15 +42,14 @@ Supertest (Integration Testing)
 Base de Datos:
 
 PostgreSQL (Hosteado en Neon)
-DevOps & CI/CD:
+DevOps & Arquitectura:
 
-GitHub Actions (Testing automatizado)
-Husky + lint-staged (Git Hooks)
-Vercel (Frontend Deploy)
-Render (Backend Deploy)
-Arquitectura:
-
-Patrón MVC (Modelo-Vista-Controlador) tanto en backend como en frontend (Hooks como controladores).
+Patrón MVC (Modelo-Vista-Controlador).
+GitHub Actions (CI/CD para testing automatizado).
+Husky + lint-staged (Git Hooks para calidad de código).
+Docker (Dockerizado para desarrollo local).
+Vercel (Frontend Deploy).
+Render (Backend Deploy).
 💻 Instalación y Ejecución Local
 Clona el repositorio:
 git clone https://github.com/elprofeclei-gif/backlog-app.gitcd backlog-app
@@ -58,6 +59,9 @@ env
 DATABASE_URL="tu_url_de_neon"
 JWT_SECRET="tu_clave_secreta"
 GOOGLE_CLIENT_ID="tu_google_client_id"
+CLOUDINARY_CLOUD_NAME="tu_cloud_name"
+CLOUDINARY_API_KEY="tu_api_key"
+CLOUDINARY_API_SECRET="tu_api_secret"
 RESEND_API_KEY="tu_resend_api_key"
 bash
 
@@ -76,6 +80,14 @@ cd frontend
 npm install
 npm run dev
 Abre http://localhost:5173 en tu navegador.
+🐳 Ejecutar con Docker (Opcional)
+El proyecto incluye configuración de Docker. Si tienes Docker instalado, simplemente ejecuta desde la raíz del proyecto:
+
+bash
+
+docker-compose up --build
+(Asegúrate de tener un archivo .env en la raíz con las variables de entorno necesarias).
+
 📖 Documentación de la API
 Una vez que el backend esté corriendo, puedes acceder a la documentación interactiva de la API en:
 http://localhost:3001/api-docs
